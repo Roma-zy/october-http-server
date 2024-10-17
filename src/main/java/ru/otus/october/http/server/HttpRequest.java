@@ -1,9 +1,14 @@
 package ru.otus.october.http.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
+    private static final Logger logger = LogManager.getLogger();
+
     private String rawRequest;
     private HttpMethod method;
     private String uri;
@@ -86,12 +91,12 @@ public class HttpRequest {
 
     public void info(boolean debug) {
         if (debug) {
-            System.out.println(rawRequest);
+            logger.debug(rawRequest);
         }
-        System.out.println("Method: " + method);
-        System.out.println("URI: " + uri);
-        System.out.println("Parameters: " + parameters);
-        System.out.println("Body: "  + body);
-        System.out.println("Headers: "  + headers.toString());
+        logger.info("Method: {}", method);
+        logger.info("URI: {}", uri);
+        logger.info("Parameters: {}", parameters);
+        logger.info("Body: {}", body);
+        logger.info("Headers: {}", headers);
     }
 }
