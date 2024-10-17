@@ -8,6 +8,7 @@ public class HttpRequest {
     private HttpMethod method;
     private String uri;
     private Map<String, String> parameters;
+    private Map<String, String> headers;
     private String body;
     private Exception exception;
 
@@ -31,6 +32,10 @@ public class HttpRequest {
         return body;
     }
 
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
     public HttpRequest(String rawRequest) {
         this.rawRequest = rawRequest;
         this.parse();
@@ -45,11 +50,15 @@ public class HttpRequest {
     }
 
     private void parse() {
+        String requestBodySeparator = "\r\n\r\n";
         int startIndex = rawRequest.indexOf(' ');
         int endIndex = rawRequest.indexOf(' ', startIndex + 1);
+
         uri = rawRequest.substring(startIndex + 1, endIndex);
         method = HttpMethod.valueOf(rawRequest.substring(0, startIndex));
         parameters = new HashMap<>();
+        headers = new HashMap<>();
+
         if (uri.contains("?")) {
             String[] elements = uri.split("[?]");
             uri = elements[0];
@@ -59,8 +68,19 @@ public class HttpRequest {
                 parameters.put(keyValue[0], keyValue[1]);
             }
         }
+
         if (method == HttpMethod.POST) {
-            this.body = rawRequest.substring(rawRequest.indexOf("\r\n\r\n") + 4);
+            this.body = rawRequest.substring(rawRequest.indexOf(requestBodySeparator) + 4);
+        }
+
+        int headersStart = rawRequest.indexOf("\r\n") + 2;
+        int headersEnd = rawRequest.indexOf(requestBodySeparator);
+        if (headersEnd > headersStart) {
+            String[] headerLines = rawRequest.substring(headersStart, headersEnd).split("\r\n");
+            for (String line : headerLines) {
+                String[] keyValue = line.split(":");
+                headers.put(keyValue[0], keyValue[1]);
+            }
         }
     }
 
@@ -72,5 +92,6 @@ public class HttpRequest {
         System.out.println("URI: " + uri);
         System.out.println("Parameters: " + parameters);
         System.out.println("Body: "  + body);
+        System.out.println("Headers: "  + headers.toString());
     }
 }
